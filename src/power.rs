@@ -21,7 +21,7 @@ pub struct PowerSupply {
 }
 
 pub trait PowerSupplyInfo {
-    fn info(&self) -> String;
+    fn info(&self) -> PowerSupply;
     fn set_device(&mut self, device: &str);
     fn get_device(&self) -> &str;
     fn get_current(&self) -> Result<i64, std::io::Error>;
@@ -33,11 +33,56 @@ pub struct Battery {
 }
 
 impl PowerSupplyInfo for Battery {
-    fn info(&self) -> String {
+    fn info(&self) -> PowerSupply {
         let mut file = File::open(&self.path).unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
-        contents
+
+        let mut power_supply = PowerSupply {
+            name: String::new(),
+            r#type: String::new(),
+            status: String::new(),
+            present: false,
+            voltage_now: 0,
+            current_now: 0,
+            capacity: 0,
+            capacity_level: String::new(),
+            temp: 0,
+            technology: String::new(),
+            charge_full: 0,
+            charge_now: 0,
+            charge_full_design: 0,
+            manufacturer: String::new(),
+        };
+
+        for line in contents.lines() {
+            let mut parts = line.splitn(2, '=');
+            let key = parts.next().unwrap_or("").trim();
+            let value = parts.next().unwrap_or("").trim();
+
+            match key {
+                "POWER_SUPPLY_NAME" => power_supply.name = value.to_string(),
+                "POWER_SUPPLY_TYPE" => power_supply.r#type = value.to_string(),
+                "POWER_SUPPLY_STATUS" => power_supply.status = value.to_string(),
+                "POWER_SUPPLY_PRESENT" => power_supply.present = value == "1",
+                "POWER_SUPPLY_VOLTAGE_NOW" => power_supply.voltage_now = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_CURRENT_NOW" => power_supply.current_now = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_CAPACITY" => power_supply.capacity = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_CAPACITY_LEVEL" => power_supply.capacity_level = value.to_string(),
+                "POWER_SUPPLY_TEMP" => power_supply.temp = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_TECHNOLOGY" => power_supply.technology = value.to_string(),
+                "POWER_SUPPLY_CHARGE_FULL" => power_supply.charge_full = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_CHARGE_NOW" => power_supply.charge_now = value.parse().unwrap_or(0),
+                "POWER_SUPPLY_CHARGE_FULL_DESIGN" => {
+                    power_supply.charge_full_design = value.parse().unwrap_or(0)
+                }
+                "POWER_SUPPLY_MANUFACTURER" => power_supply.manufacturer = value.to_string(),
+                _ => {}
+            }
+        }
+
+        power_supply
+        
     }
 
     fn set_device(&mut self, device: &str) {
