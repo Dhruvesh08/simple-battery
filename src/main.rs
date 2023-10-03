@@ -1,24 +1,13 @@
-use std::io;
-use std::thread;
-use std::time::Duration;
+mod power;
 
-fn main() -> battery::Result<()> {
-    let manager = battery::Manager::new()?;
-    let mut battery = match manager.batteries()?.next() {
-        Some(Ok(battery)) => battery,
-        Some(Err(e)) => {
-            eprintln!("Unable to access battery information");
-            return Err(e);
-        }
-        None => {
-            eprintln!("Unable to find any batteries");
-            return Err(io::Error::from(io::ErrorKind::NotFound).into());
-        }
+pub use power::{Battery, PowerSupply, PowerSupplyInfo};
+
+fn main() {
+    let battery = Battery {
+        path: "/sys/class/power_supply/bq27441-0/uevent".to_string(),
+        currnet_now: "/sys/class/power_supply/bq27441-0/current_now".to_string(),
     };
-
-    loop {
-        println!("{:?}", battery);
-        thread::sleep(Duration::from_secs(1));
-        manager.refresh(&mut battery)?;
-    }
+    println!("Battery Info: {}", battery.info());
+    println!("Battery Path: {}", battery.get_device());
+    println!("Battery Current: {}", battery.get_current().unwrap());
 }
