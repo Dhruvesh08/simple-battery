@@ -34,7 +34,10 @@ pub struct Battery {
 
 impl PowerSupplyInfo for Battery {
     fn info(&self) -> String {
-        "Battrery Info".to_string()
+        let mut file = File::open(&self.path).unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+        contents
     }
 
     fn set_device(&mut self, device: &str) {

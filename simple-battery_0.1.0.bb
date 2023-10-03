@@ -7,11 +7,11 @@ inherit cargo
 
 # how to get simple-battery could be as easy as but default to a git checkout:
 # SRC_URI += "crate://crates.io/simple-battery/0.1.0"
-SRC_URI += "git://github.com/Dhruvesh08/simple-battery.git;protocol=https;nobranch=1;branch=main"
-SRCREV = "02b674d1b1c2d13095f7221a7741c9355b3939cd"
+SRC_URI += "git://github.com/Dhruvesh08/simple-battery.git;protocol=https;nobranch=1;branch=mecha-power-v1"
+SRCREV = "60edd5c474da5d729fdb42c2110d890004097db1"
 S = "${WORKDIR}/git"
 CARGO_SRC_DIR = ""
-PV:append = ".AUTOINC+02b674d1b1"
+PV:append = ".AUTOINC+60edd5c474"
 
 # please note if you have entries that do not begin with crate://
 # you must change them to how that package can be fetched
